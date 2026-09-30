@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verify · Synapse</title>
+<style>
+:root{--bg:#05070d;--ink:#eef2fb;--dim:#98a7c4;--a:#7c6cff;--b:#00d4ff;--c:#ff5fa2;--d:#ffe66d;font-family:Inter,"Segoe UI",system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+*{box-sizing:border-box;margin:0}
+::-webkit-scrollbar{width:10px}::-webkit-scrollbar-track{background:#070a12}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--a),var(--b));border-radius:6px}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:
+radial-gradient(1000px 700px at 80% -10%,#5a45d522,transparent 60%),
+radial-gradient(900px 600px at -10% 30%,#00d4ff1a,transparent 60%),
+linear-gradient(180deg,#070a12,#05070d)}
+.orb{position:fixed;border-radius:50%;filter:blur(70px);opacity:.5;pointer-events:none;animation:float 16s ease-in-out infinite}
+.orb.o1{width:380px;height:380px;top:-90px;right:-60px;background:radial-gradient(circle,#8a5cf6,transparent 65%)}
+.orb.o2{width:320px;height:320px;bottom:-70px;left:-80px;background:radial-gradient(circle,#00d4ff,transparent 65%);animation-delay:-5s}
+.orb.o3{width:240px;height:240px;top:30%;left:55%;background:radial-gradient(circle,#ff5fa2,transparent 65%);opacity:.25;animation-delay:-9s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.08)}66%{transform:translate(-30px,25px) scale(.94)}}
+.auth{position:relative;z-index:1;width:100%;max-width:430px;animation:cardIn .55s cubic-bezier(.22,1,.36,1) both}
+@keyframes cardIn{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+.card{border-radius:26px;padding:34px 30px 30px;background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(18px) saturate(140%);box-shadow:0 30px 80px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.08)}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.logo{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-weight:900;font-size:1.15rem;color:#fff;background:conic-gradient(from 210deg,var(--a),var(--b),var(--c),var(--a));box-shadow:0 8px 24px #7c6cff55;animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.brand h1{font-size:1.25rem;font-weight:800;letter-spacing:-.01em}
+.brand small{color:var(--dim);font-weight:500}
+h2{font-size:1.5rem;font-weight:800;margin-bottom:6px}
+.sub{color:var(--dim);font-size:.92rem;margin-bottom:22px}
+.sub b{color:var(--b);font-weight:600;overflow-wrap:anywhere}
+.codebox{display:flex;gap:9px;justify-content:center;margin:26px 0 8px}
+.codebox input{width:52px;height:62px;text-align:center;font-size:1.5rem;font-weight:800;border-radius:14px;background:rgba(8,12,24,.7);color:var(--ink);border:1px solid rgba(255,255,255,.15);outline:none;transition:border-color .25s,box-shadow .25s,transform .25s}
+.codebox input:focus{border-color:var(--b);box-shadow:0 0 0 4px #00d4ff1f,0 0 20px #00d4ff22;transform:translateY(-2px)}
+.codebox input:disabled{opacity:.45}
+.codebox input.wrong{border-color:var(--c);box-shadow:0 0 0 4px #ff5fa21f;animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.hint{text-align:center;font-size:.85rem;color:var(--dim);min-height:22px}
+.hint.ok{color:#9ff0cf}
+.hint.warn{color:#ffd166}
+.devcode{margin:14px 0;padding:12px 14px;border-radius:12px;background:rgba(255,230,109,.07);border:1px dashed #ffe66d66;text-align:center;font-size:.85rem;color:#ffe9a8}
+.devcode b{font-size:1.3rem;letter-spacing:.3em;font-weight:800}
+.btn{width:100%;border:0;cursor:pointer;padding:14px;border-radius:14px;font-weight:800;font-size:.95rem;background:linear-gradient(120deg,var(--a),var(--b));color:#04101a;box-shadow:0 10px 28px #7c6cff44;position:relative;overflow:hidden;transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .3s,opacity .3s}
+.btn::after{content:"";position:absolute;top:0;left:-70%;width:45%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);transform:skewX(-20deg);transition:left .6s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 14px 34px #00d4ff55}
+.btn:hover::after{left:120%}
+.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.btn.loading{pointer-events:none}
+.btn.loading::before{content:"";display:inline-block;width:14px;height:14px;margin-right:8px;border:2px solid #04101a55;border-top-color:#04101a;border-radius:50%;vertical-align:-2px;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.resend{margin-top:16px;text-align:center;font-size:.88rem;color:var(--dim)}
+.resend button{background:none;border:0;color:var(--b);font-weight:700;cursor:pointer;font:inherit;text-decoration:none}
+.resend button:hover{text-decoration:underline}
+.resend button:disabled{color:#5b6883;cursor:not-allowed;text-decoration:none}
+.lockbanner{margin-bottom:16px;padding:12px 14px;border-radius:12px;background:rgba(255,95,162,.1);border:1px solid #ff5fa255;display:flex;align-items:center;gap:10px;font-size:.9rem;color:#ffc2d4}
+.lockbanner b{font-variant-numeric:tabular-nums}
+.lockbanner .ico{font-size:1.2rem}
+.alt{margin-top:18px;text-align:center;color:var(--dim);font-size:.88rem}
+.alt a{color:var(--b);font-weight:700;text-decoration:none}
+.alt a:hover{text-decoration:underline}
+.toast{position:fixed;top:22px;left:50%;transform:translateX(-50%) translateY(-80px);z-index:99;padding:12px 18px;border-radius:12px;font-weight:600;font-size:.88rem;opacity:0;transition:all .35s cubic-bezier(.22,1,.36,1);max-width:92vw}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.err{background:#3a1020;color:#ffb3c3;border:1px solid #ff5fa255;box-shadow:0 12px 40px #ff5fa233}
+.toast.ok{background:#0a2b20;color:#9ff0cf;border:1px solid #34d39955;box-shadow:0 12px 40px #34d39922}
+.foot{margin-top:22px;text-align:center;color:#5b6883;font-size:.78rem}
+</style>
+</head>
+<body>
+<div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+<div class="auth">
+  <div class="card">
+    <div class="brand"><div class="logo">S</div><div><h1>Synapse</h1><small>Verify your identity</small></div></div>
+    <div id="lockbanner" class="lockbanner" style="display:none"><span class="ico">🔒</span><span>Verification locked for <b id="locktimer">--</b> after too many attempts.</span></div>
+    <h2>Check your email</h2>
+    <p class="sub">We sent a 6-digit code to <b id="email-label"></b>. It expires in 10 minutes.</p>
+    <div class="codebox" id="codebox"></div>
+    <div class="hint" id="hint"></div>
+    <div id="devcode" class="devcode" style="display:none">Development mode (SMTP not set) — your code is <b id="devvalue"></b></div>
+    <button class="btn" id="verify" type="button" onclick="verify()" style="margin-top:20px">Verify &amp; continue</button>
+    <p class="resend">Didn't get it? <button id="resend" onclick="resend()">Resend code</button><span id="resend-timer"></span></p>
+    <p class="alt"><a href="/login">← Back to sign in</a></p>
+  </div>
+  <p class="foot">3 incorrect attempts lock verification for 10 minutes</p>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const q=new URLSearchParams(location.search);
+const email=(q.get('email')||'').trim();const purpose=(q.get('purpose')||'signup');
+const len=6;const boxes=[];
+let resendCooldown=0,lockSeconds=0,lockTicking=false,resendTicking=false;
+function toast(msg,ok){const t=document.querySelector('#toast');t.textContent=msg;t.className='toast '+(ok?'ok':'err')+' show';clearTimeout(t._h);t._h=setTimeout(()=>t.className='toast',4200)}
+async function readApiJson(r){const text=await r.text();if(!text)return {};try{return JSON.parse(text)}catch(e){const html=/^\s*</.test(text);throw Error(html?`The server returned a web page instead of API data (HTTP ${r.status}). Please refresh and try again.`:`The server returned invalid data (HTTP ${r.status}). Please try again.`)}}
+function setHint(msg,cls){const h=document.querySelector('#hint');h.textContent=msg||'';h.className='hint'+(cls?' '+cls:'');h.classList.remove('ok','warn')}
+if(!email){setHint('Missing email. Please sign in again.','warn')}
+document.querySelector('#email-label').textContent=email;
+if(q.get('dev')){document.querySelector('#devcode').style.display='block';document.querySelector('#devvalue').textContent=q.get('dev')}
+const box=document.querySelector('#codebox');
+for(let i=0;i<len;i++){const inp=document.createElement('input');inp.type='text';inp.inputMode='numeric';inp.maxLength=1;inp.autocomplete='one-time-code';inp.setAttribute('aria-label','Digit '+(i+1));box.appendChild(inp);boxes.push(inp);
+inp.addEventListener('input',()=>{inp.value=inp.value.replace(/\D/g,'');if(inp.value&&i<len-1)boxes[i+1].focus()});
+inp.addEventListener('keydown',(e)=>{if(e.key==='Backspace'&&!inp.value&&i>0)boxes[i-1].focus();if(e.key==='Enter')verify()});
+inp.addEventListener('paste',(e)=>{e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,len);t.split('').forEach((c,i)=>{if(boxes[i]){boxes[i].value=c}});boxes[Math.min(t.length,len-1)].focus()})}
+if(boxes[0])boxes[0].focus();
+function getCode(){return boxes.map(b=>b.value).join('')}
+function codeComplete(){return getCode().length===len}
+function setLock(secs){lockSeconds=secs;const b=document.querySelector('#lockbanner');b.style.display=secs>0?'flex':'none';const btn=document.querySelector('#verify');boxes.forEach(x=>x.disabled=secs>0);btn.disabled=secs>0||resendTicking;if(secs>0&&!lockTicking){lockTicking=true;setInterval(()=>{lockSeconds--;if(lockSeconds<=0){lockTicking=false;b.style.display='none';boxes.forEach(x=>x.disabled=false);updateButtons();return}document.querySelector('#locktimer').textContent=Math.floor(lockSeconds/60)+'m '+(lockSeconds%60)+'s'},1000)}}
+function startResendCountdown(){resendCooldown=60;resendTicking=true;const r=document.querySelector('#resend');const t=document.querySelector('#resend-timer');r.disabled=true;setInterval(()=>{resendCooldown--;t.textContent=' ('+resendCooldown+'s)';if(resendCooldown<=0){resendTicking=false;t.textContent='';updateButtons()}},1000)}
+function updateButtons(){const r=document.querySelector('#resend');const btn=document.querySelector('#verify');r.disabled=resendTicking||lockSeconds>0;btn.disabled=lockSeconds>0||codeComplete()===false||lockTicking}
+async function resend(){if(resendTicking||lockSeconds>0)return;const btn=document.querySelector('#resend');btn.disabled=true;try{const r=await fetch('/api/auth/otp/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,purpose})});const d=await readApiJson(r);if(!r.ok)throw Error(d.detail||`Request failed (HTTP ${r.status})`);if(d.dev_code){const dv=document.querySelector('#devcode');document.querySelector('#devvalue').textContent=d.dev_code;dv.style.display='block'}boxes.forEach(b=>b.value='');boxes[0].focus();toast(d.message,true);startResendCountdown()}catch(err){toast(err.message)}finally{updateButtons()}}
+async function verify(){if(!email){toast('Missing email.',false);return}if(!codeComplete()){boxes.forEach((b,i)=>{if(!b.value){b.focus();return}});setHint('Enter all '+len+' digits.','warn');return}const btn=document.querySelector('#verify');btn.disabled=true;btn.classList.add('loading');setHint('');
+try{const r=await fetch('/api/auth/otp/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,purpose,code:getCode()})});const d=await readApiJson(r);
+if(r.ok){if(d.redirect){toast('Verified. Redirecting…',true);setTimeout(()=>location.href=d.redirect,650);return}toast('Verified.',true);return}
+const lock=r.headers.get('X-Auth-Lock');
+if(lock&&Number(lock)>0){setLock(Number(lock));toast('Verification locked for 10 minutes.',false);return}
+setHint(d.detail||'Incorrect code.','warn');boxes.forEach(b=>{b.value='';b.classList.add('wrong');setTimeout(()=>b.classList.remove('wrong'),450)});boxes[0].focus()}catch(err){toast(err.message)}finally{btn.classList.remove('loading');updateButtons()}}
+setInterval(updateButtons,300);
+startResendCountdown();
+</script>
+</body></html>

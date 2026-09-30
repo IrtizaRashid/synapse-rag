@@ -1,0 +1,39 @@
+services:
+  rag-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: synapse-rag-api:preview
+    env_file:
+      - .env
+    environment:
+      TRUST_PROXY: "false"
+      COOKIE_SECURE: "false"
+      FRONTEND_ORIGIN: http://127.0.0.1:3000
+      ALLOWED_ORIGINS: http://127.0.0.1:3000
+    volumes:
+      - rag_preview_data:/app/data
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import json, urllib.request; data=json.load(urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)); raise SystemExit(0 if data.get('status') == 'ok' else 1)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  rag-web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: synapse-rag-web:preview
+    environment:
+      FASTAPI_ORIGIN: http://rag-api:8000
+    depends_on:
+      rag-api:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+
+volumes:
+  rag_preview_data:

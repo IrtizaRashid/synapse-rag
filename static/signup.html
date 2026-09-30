@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Create account · Synapse</title>
+<style>
+:root{--bg:#05070d;--ink:#eef2fb;--dim:#98a7c4;--a:#7c6cff;--b:#00d4ff;--c:#ff5fa2;--d:#ffe66d;font-family:Inter,"Segoe UI",system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+*{box-sizing:border-box;margin:0}
+::-webkit-scrollbar{width:10px}::-webkit-scrollbar-track{background:#070a12}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--a),var(--b));border-radius:6px}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:
+radial-gradient(1000px 700px at 80% -10%,#5a45d522,transparent 60%),
+radial-gradient(900px 600px at -10% 30%,#00d4ff1a,transparent 60%),
+linear-gradient(180deg,#070a12,#05070d)}
+.orb{position:fixed;border-radius:50%;filter:blur(70px);opacity:.5;pointer-events:none;animation:float 16s ease-in-out infinite}
+.orb.o1{width:380px;height:380px;top:-90px;right:-60px;background:radial-gradient(circle,#8a5cf6,transparent 65%)}
+.orb.o2{width:320px;height:320px;bottom:-70px;left:-80px;background:radial-gradient(circle,#00d4ff,transparent 65%);animation-delay:-5s}
+.orb.o3{width:240px;height:240px;top:25%;left:55%;background:radial-gradient(circle,#ff5fa2,transparent 65%);opacity:.25;animation-delay:-9s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.08)}66%{transform:translate(-30px,25px) scale(.94)}}
+.auth{position:relative;z-index:1;width:100%;max-width:430px;animation:cardIn .55s cubic-bezier(.22,1,.36,1) both}
+@keyframes cardIn{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+.card{border-radius:26px;padding:34px 30px 30px;background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(18px) saturate(140%);box-shadow:0 30px 80px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.08)}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.logo{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-weight:900;font-size:1.15rem;color:#fff;background:conic-gradient(from 210deg,var(--a),var(--b),var(--c),var(--a));box-shadow:0 8px 24px #7c6cff55;animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.brand h1{font-size:1.25rem;font-weight:800;letter-spacing:-.01em}
+.brand small{color:var(--dim);font-weight:500}
+h2{font-size:1.5rem;font-weight:800;margin-bottom:6px}
+.sub{color:var(--dim);font-size:.92rem;margin-bottom:22px}
+.field{margin-bottom:14px}
+label{display:block;font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+input{width:100%;padding:13px 15px;border-radius:13px;background:rgba(8,12,24,.6);color:var(--ink);border:1px solid rgba(255,255,255,.12);outline:none;font:inherit;transition:border-color .3s,box-shadow .3s}
+input:focus{border-color:var(--b);box-shadow:0 0 0 4px #00d4ff1f,0 0 20px #00d4ff22}
+input::placeholder{color:#5b6883}
+input.invalid{border-color:var(--c);box-shadow:0 0 0 4px #ff5fa21a}
+.meter{margin-top:7px;height:5px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}
+.meter i{display:block;height:100%;width:0;border-radius:4px;transition:width .3s,background .3s}
+.meter-label{display:flex;justify-content:space-between;margin-top:5px;font-size:.72rem;color:var(--dim)}
+.wrap-eye{position:relative}.wrap-eye input{padding-right:44px}.eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:0;cursor:pointer;font-size:1rem;opacity:.6}
+.btn{width:100%;border:0;cursor:pointer;padding:14px;border-radius:14px;font-weight:800;font-size:.95rem;background:linear-gradient(120deg,var(--a),var(--b));color:#04101a;box-shadow:0 10px 28px #7c6cff44;position:relative;overflow:hidden;transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .3s}
+.btn::after{content:"";position:absolute;top:0;left:-70%;width:45%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);transform:skewX(-20deg);transition:left .6s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 14px 34px #00d4ff55}
+.btn:hover::after{left:120%}
+.btn:disabled{opacity:.6;cursor:wait;transform:none}
+.btn.loading{pointer-events:none}
+.btn.loading::before{content:"";display:inline-block;width:14px;height:14px;margin-right:8px;border:2px solid #04101a55;border-top-color:#04101a;border-radius:50%;vertical-align:-2px;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.terms{margin:16px 0 0;display:flex;align-items:flex-start;gap:9px;color:var(--dim);font-size:.78rem;line-height:1.45}
+.terms input{width:16px;height:16px;margin:1px 0 0;flex:none;accent-color:var(--b)}
+.alt{margin-top:18px;text-align:center;color:var(--dim);font-size:.88rem}
+.alt a{color:var(--b);font-weight:700;text-decoration:none}
+.alt a:hover{text-decoration:underline}
+.toast{position:fixed;top:22px;left:50%;transform:translateX(-50%) translateY(-80px);z-index:99;padding:12px 18px;border-radius:12px;font-weight:600;font-size:.88rem;opacity:0;transition:all .35s cubic-bezier(.22,1,.36,1);max-width:92vw}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.err{background:#3a1020;color:#ffb3c3;border:1px solid #ff5fa255;box-shadow:0 12px 40px #ff5fa233}
+.toast.ok{background:#0a2b20;color:#9ff0cf;border:1px solid #34d39955;box-shadow:0 12px 40px #34d39922}
+.foot{margin-top:22px;text-align:center;color:#5b6883;font-size:.78rem}
+</style>
+</head>
+<body>
+<div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+<div class="auth">
+  <div class="card">
+    <div class="brand"><div class="logo">S</div><div><h1>Synapse</h1><small>AI knowledge workspace</small></div></div>
+    <h2>Create your account</h2>
+    <p class="sub">Verify your email with a one-time code to get started.</p>
+    <form id="form" autocomplete="off" onsubmit="submitForm(event)">
+      <div class="field"><label for="name">Full name</label><input id="name" placeholder="Jane Cooper" required maxlength="100"></div>
+      <div class="field"><label for="email">Email address</label><input id="email" type="email" placeholder="you@example.com" required></div>
+      <div class="field"><label for="password">Password</label>
+        <div class="wrap-eye"><input id="password" type="password" placeholder="At least 8 characters" required minlength="8"><button type="button" class="eye" onclick="toggleEye('password')" aria-label="Show password">👁</button></div>
+        <div class="meter"><i id="meter"></i></div><div class="meter-label"><span id="pwlabel">Strength</span><span>8+ chars required</span></div>
+      </div>
+      <div class="field"><label for="confirm">Confirm password</label>
+        <div class="wrap-eye"><input id="confirm" type="password" placeholder="Repeat your password" required minlength="8"><button type="button" class="eye" onclick="toggleEye('confirm')" aria-label="Show password">👁</button></div>
+      </div>
+      <label class="terms"><input id="agree" type="checkbox" required><span>I agree to the terms and understand my workspace is protected by this account.</span></label>
+      <button class="btn" id="submit" type="submit" style="margin-top:16px">Create account</button>
+    </form>
+    <p class="alt">Already have an account? <a href="/login">Sign in</a></p>
+  </div>
+  <p class="foot">Email verification · 6-digit one-time code · expires in 10 minutes</p>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+function toast(msg,ok){const t=document.querySelector('#toast');t.textContent=msg;t.className='toast '+(ok?'ok':'err')+' show';clearTimeout(t._h);t._h=setTimeout(()=>t.className='toast',4200)}
+async function readApiJson(r){const text=await r.text();if(!text)return {};try{return JSON.parse(text)}catch(e){const html=/^\s*</.test(text);throw Error(html?`The server returned a web page instead of API data (HTTP ${r.status}). Please refresh and try again.`:`The server returned invalid data (HTTP ${r.status}). Please try again.`)}}
+function toggleEye(id){const p=document.querySelector('#'+id);p.type=p.type==='password'?'text':'password'}
+const pw=document.querySelector('#password');
+pw.addEventListener('input',()=>{const v=pw.value;let s=0;if(v.length>=8)s++;if(/[A-Z]/.test(v)&&/[a-z]/.test(v))s++;if(/\d/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;const m=document.querySelector('#meter');const l=document.querySelector('#pwlabel');const cols=['#ff5fa2','#ffd166','#ffe66d','#34d399'];m.style.width=(s/4*100)+'%';m.style.background=cols[s];l.textContent=['Too weak','Weak','Fair','Good','Strong'][s]});
+async function submitForm(e){e.preventDefault();const name=document.querySelector('#name').value.trim();const email=document.querySelector('#email').value.trim();const password=document.querySelector('#password').value;const confirm=document.querySelector('#confirm').value;const btn=document.querySelector('#submit');
+if(password!==confirm){toast('Passwords do not match.');return}
+if(!document.querySelector('#agree').checked){toast('Please accept the terms to continue.');return}
+btn.disabled=true;btn.classList.add('loading');
+try{const r=await fetch('/api/auth/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password})});const d=await readApiJson(r);if(!r.ok)throw Error(d.detail||`Request failed (HTTP ${r.status})`);location.href='/verify?email='+encodeURIComponent(email)+'&purpose=signup'+(d.dev_code?'&dev='+encodeURIComponent(d.dev_code):'')}catch(err){toast(err.message)}finally{btn.disabled=false;btn.classList.remove('loading')}}
+</script>
+</body></html>

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="dark light">
+  <title>Synapse — AI Workspace</title>
+  <link rel="stylesheet" href="/assets/workspace.css?v=313">
+  <link rel="stylesheet" href="/assets/magicui/magicui.css?v=2">
+</head>
+<body>
+<div id="magicui-root" aria-hidden="true"></div>
+<div class="app-shell" id="appShell">
+  <div class="mobile-scrim" id="mobileScrim"></div>
+  <aside class="sidebar" id="sidebar" aria-label="Workspace navigation">
+    <div class="brand-row">
+      <button class="brand" data-view="chat" aria-label="Synapse home"><span class="brand-mark">S</span><span>Synapse</span></button>
+      <button class="icon-btn sidebar-close mobile-only" data-action="close-sidebar" aria-label="Close menu">×</button>
+    </div>
+    <button class="new-chat-btn" data-action="new-chat">
+      <span class="button-icon">＋</span><span>New chat</span><kbd>Ctrl K</kbd>
+    </button>
+    <label class="sidebar-search">
+      <span aria-hidden="true">⌕</span>
+      <input id="conversationSearch" type="search" placeholder="Search conversations" autocomplete="off">
+    </label>
+    <div class="sidebar-scroll">
+      <div class="section-label"><span>Conversations</span><span id="conversationCount">0</span></div>
+      <div class="conversation-list" id="conversationList">
+        <div class="skeleton-list"><i></i><i></i><i></i></div>
+      </div>
+    </div>
+    <nav class="sidebar-nav" aria-label="Primary">
+      <button class="nav-item active" data-view="chat"><span>◌</span><span>Chat</span></button>
+      <button class="nav-item" data-view="bots"><span>◇</span><span>Bots</span><em id="botCount">0</em></button>
+      <button class="nav-item" data-view="files"><span>▱</span><span>Files</span><em id="fileCount">0</em></button>
+      <button class="nav-item" data-view="settings"><span>⚙</span><span>Settings</span></button>
+    </nav>
+    <div class="account-menu">
+      <div class="avatar" id="accountAvatar">U</div>
+      <div class="account-copy"><strong id="accountName">Your workspace</strong><span id="accountEmail">Loading…</span></div>
+      <button class="icon-btn" data-action="logout" title="Log out" aria-label="Log out">↪</button>
+    </div>
+  </aside>
+
+  <main class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn mobile-only" data-action="open-sidebar" aria-label="Open menu">☰</button>
+        <div class="chat-heading">
+          <button class="conversation-title" id="conversationTitle" data-action="rename-conversation">New conversation</button>
+          <span class="save-state" id="saveState">Saved</span>
+        </div>
+      </div>
+      <div class="topbar-center" id="activeBotBar">
+        <button class="bot-picker-trigger" data-action="toggle-bot-picker">
+          <span class="bot-stack" id="activeBotAvatars"></span>
+          <span id="activeBotSummary">Select bots</span><span class="chevron">⌄</span>
+        </button>
+        <div class="popover bot-picker" id="botPicker" hidden>
+          <div class="popover-head"><strong>Active bots</strong><span>Select one or more</span></div>
+          <div id="botPickerList"></div>
+          <button class="text-btn full" data-view="bots">Manage bots</button>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" data-action="toggle-theme" title="Toggle theme" aria-label="Toggle theme">◐</button>
+        <button class="icon-btn desktop-only" data-action="toggle-context" title="Toggle context panel" aria-label="Toggle context panel">☷</button>
+        <button class="icon-btn" data-action="conversation-menu" title="Conversation options" aria-label="Conversation options">•••</button>
+        <div class="popover conversation-menu" id="conversationMenu" hidden>
+          <button data-action="rename-conversation">✎ Rename</button>
+          <button class="danger" data-action="delete-conversation">⌫ Delete</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="view active" id="chatView" data-view-panel="chat">
+      <div class="chat-scroll" id="chatScroll">
+        <div class="welcome" id="welcomeState">
+          <div id="magicWelcomeVisual"></div>
+          <div class="welcome-symbol">S</div>
+          <h1>How can your workspace help?</h1>
+          <p>Upload documents, turn selected files into a focused bot, then ask questions grounded in that knowledge.</p>
+          <div id="magicQuickActions"><div class="quick-grid" aria-hidden="true"></div></div>
+          <div class="welcome-section" id="welcomeBots"></div>
+        </div>
+        <div class="message-stream" id="messageStream" aria-live="polite"></div>
+        <div class="thinking-stack" id="thinkingStack"></div>
+      </div>
+      <div class="composer-wrap" id="composerDropzone">
+        <div class="attached-files" id="composerAttachments"></div>
+        <div class="composer">
+          <div id="magicComposerBeam"></div>
+          <button class="composer-icon" data-action="upload-chat" title="Attach files" aria-label="Attach files">＋</button>
+          <textarea id="messageInput" rows="1" placeholder="Message your bots…" aria-label="Message"></textarea>
+          <button class="composer-tool" data-action="toggle-bot-picker" title="Choose bots"><span id="composerBotCount">0 bots</span></button>
+          <button class="send-btn" id="sendButton" data-action="send" aria-label="Send message">↑</button>
+        </div>
+        <div class="composer-note">Bots answer only from connected knowledge · Enter to send · Shift+Enter for a new line</div>
+      </div>
+    </section>
+
+    <section class="view workspace-view" id="botsView" data-view-panel="bots">
+      <div class="page-header"><div><span class="eyebrow">Bots</span><h1>Create bot</h1><p>Select uploaded files so the bot only answers from approved knowledge.</p></div><div class="header-actions"><button class="secondary-btn" data-action="upload-files">↥ Add documents</button><button class="primary-btn" data-action="create-bot">＋ Create bot</button></div></div>
+      <div class="toolbar"><label class="search-field"><span>⌕</span><input id="botSearch" placeholder="Search bots"></label><div class="segmented" id="botFilter"><button class="active" data-bot-filter="all">All</button><button data-bot-filter="enabled">Enabled</button><button data-bot-filter="disabled">Disabled</button></div></div>
+      <div class="bot-grid" id="botGrid"></div>
+    </section>
+
+    <section class="view workspace-view" id="filesView" data-view-panel="files">
+      <div class="page-header"><div><span class="eyebrow">Knowledge</span><h1>Upload documents</h1><p>Add knowledge before creating a bot. You can return here anytime to add more documents later.</p></div><div class="header-actions"><button class="secondary-btn" data-action="add-url">＋ Add website</button><button class="primary-btn" data-action="upload-files">↥ Upload files</button></div></div>
+      <div class="drop-zone" id="fileDropzone"><span class="drop-icon">↥</span><div><strong>Drop files here to add knowledge</strong><small>PDF, Office, CSV, Excel, JSON, Markdown, code, images, and more · Up to 25 MB each</small></div><button class="secondary-btn" data-action="upload-files">Browse files</button></div>
+      <div class="toolbar file-toolbar"><label class="search-field"><span>⌕</span><input id="fileSearch" placeholder="Search files"></label><select id="fileTypeFilter" aria-label="File type"><option value="">All types</option></select><select id="fileSort" aria-label="Sort files"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="name">Name</option><option value="size">Largest</option></select><div class="view-toggle"><button class="active" data-file-view="list" title="List">☷</button><button data-file-view="grid" title="Grid">▦</button></div></div>
+      <div class="file-list" id="fileList"></div>
+    </section>
+
+    <section class="view workspace-view" id="settingsView" data-view-panel="settings">
+      <div class="page-header"><div><span class="eyebrow">Preferences</span><h1>Settings</h1><p>Customize your workspace experience.</p></div></div>
+      <div class="settings-list">
+        <div class="settings-row"><div><strong>Appearance</strong><p>Choose a light or dark workspace.</p></div><div class="segmented"><button data-theme-choice="light">Light</button><button data-theme-choice="dark">Dark</button><button data-theme-choice="system">System</button></div></div>
+        <div class="settings-row"><div><strong>Conversation behavior</strong><p>Conversation history is stored persistently and included in follow-up context.</p></div><span class="status-pill success">Enabled</span></div>
+        <div class="settings-row"><div><strong>Grounded responses</strong><p>Bots are restricted to the sources connected to them and files attached to the conversation.</p></div><span class="status-pill success">Protected</span></div>
+        <div class="settings-row"><div><strong>Account</strong><p id="settingsEmail">—</p></div><button class="secondary-btn danger-text" data-action="logout">Log out</button></div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="context-panel" id="contextPanel">
+    <div class="context-head"><div><strong>Conversation context</strong><span>Knowledge available in this chat</span></div><button class="icon-btn" data-action="toggle-context">×</button></div>
+    <div class="context-section"><div class="context-label"><span>Active bots</span><button data-action="toggle-bot-picker">Edit</button></div><div id="contextBots" class="context-bot-list"></div></div>
+    <div class="context-section"><div class="context-label"><span>Attached files</span><button data-action="upload-chat">Add</button></div><div id="contextFiles" class="context-file-list"></div></div>
+    <div class="context-section sources-section"><div class="context-label"><span>Recent sources</span></div><div id="contextSources" class="context-source-list"><div class="context-empty">Sources cited by responses will appear here.</div></div></div>
+  </aside>
+</div>
+
+<input type="file" id="fileInput" multiple hidden accept=".pdf,.doc,.docx,.rtf,.ppt,.pptx,.txt,.md,.markdown,.csv,.tsv,.xls,.xlsx,.json,.xml,.js,.jsx,.ts,.tsx,.py,.java,.c,.cpp,.h,.hpp,.html,.css,.sql,.php,.go,.rs,.rb,.sh,.yaml,.yml,.log,.ini,.env,.config,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff">
+
+<div class="modal-backdrop" id="modalBackdrop" hidden>
+  <div class="modal onboarding-modal" id="onboardingModal" hidden>
+    <div class="onboarding-symbol">↥</div>
+    <span class="eyebrow">First upload</span>
+    <h2>Choose files for your first bot</h2>
+    <p>Upload the documents this workspace should read. Synapse will index them, create embeddings, then ask you to create a bot from the files you select.</p>
+    <div class="onboarding-actions">
+      <button class="primary-btn clear-primary" data-action="upload-onboarding"><span class="btn-icon">↥</span><span>Upload files now</span></button>
+    </div>
+    <small>You can add more documents later from Files.</small>
+  </div>
+
+  <div class="modal" id="botModal" hidden>
+    <div class="modal-head"><div><span class="eyebrow">AI teammate</span><h2 id="botModalTitle">Create bot</h2></div><button class="icon-btn" data-action="close-modal">×</button></div>
+    <form id="botForm">
+      <input type="hidden" id="botId">
+      <div class="bot-identity-row"><button type="button" class="avatar-picker" id="botAvatarButton" data-action="cycle-avatar">✦</button><label class="field grow"><span>Name</span><input id="botName" maxlength="100" required placeholder="Research assistant"></label><label class="switch-field"><span>Enabled</span><input id="botEnabled" type="checkbox" checked><i></i></label></div>
+      <label class="field"><span>Description</span><input id="botDescription" maxlength="500" placeholder="What does this bot specialize in?"></label>
+      <label class="field"><span>Instructions</span><textarea id="botInstructions" rows="5" maxlength="4000" placeholder="Define tone, expertise, output format, or working style…"></textarea><small>Grounding and source restrictions always take priority.</small></label>
+      <fieldset class="source-picker"><legend>Connected knowledge <span id="botSourceCount">0 selected</span></legend><label class="picker-search"><span>⌕</span><input id="botSourceSearch" placeholder="Search files"></label><div id="botSourceList"></div></fieldset>
+      <div class="modal-actions"><button type="button" class="secondary-btn" data-action="close-modal">Cancel</button><button class="primary-btn clear-primary" type="submit" id="saveBotButton"><span class="btn-icon">✓</span><span>Create bot with selected files</span></button></div>
+    </form>
+  </div>
+
+  <div class="modal preview-modal" id="previewModal" hidden>
+    <div class="modal-head"><div class="file-title-wrap"><span class="file-icon large" id="previewIcon">TXT</span><div><h2 id="previewTitle">File preview</h2><p id="previewMeta">—</p></div></div><div class="modal-head-actions"><a class="icon-btn" id="downloadFileButton" title="Download">↓</a><button class="icon-btn" data-action="fullscreen-preview" title="Fullscreen">⛶</button><button class="icon-btn" data-action="close-modal">×</button></div></div>
+    <div class="preview-stats" id="previewStats"></div>
+    <div class="preview-search"><label><span>⌕</span><input id="previewSearch" placeholder="Search in file"></label><span id="previewMatches"></span></div>
+    <div class="preview-body" id="previewBody"></div>
+  </div>
+
+  <div class="modal small-modal" id="textModal" hidden>
+    <div class="modal-head"><h2 id="textModalTitle">Rename</h2><button class="icon-btn" data-action="close-modal">×</button></div>
+    <form id="textModalForm"><label class="field"><span id="textModalLabel">Name</span><input id="textModalInput" required maxlength="255"></label><div class="modal-actions"><button type="button" class="secondary-btn" data-action="close-modal">Cancel</button><button class="primary-btn" type="submit">Save</button></div></form>
+  </div>
+
+  <div class="modal small-modal" id="confirmModal" hidden>
+    <div class="confirm-symbol">!</div><h2 id="confirmTitle">Delete item?</h2><p id="confirmText">This action cannot be undone.</p><div class="modal-actions"><button class="secondary-btn" data-action="close-modal">Cancel</button><button class="danger-btn" id="confirmButton">Delete</button></div>
+  </div>
+
+  <div class="modal small-modal next-step-modal" id="nextStepModal" hidden>
+    <div class="confirm-symbol success-symbol">✓</div>
+    <h2>Bot created</h2>
+    <p>What do you want to do next?</p>
+    <div class="next-actions">
+      <button class="primary-btn clear-primary" data-action="next-start-chat"><span class="btn-icon">↗</span><span>Start asking this bot</span></button>
+      <button class="secondary-btn clear-secondary" data-action="add-more-docs"><span class="btn-icon">↥</span><span>Upload more files</span></button>
+      <button class="secondary-btn clear-secondary" data-action="create-bot"><span class="btn-icon">＋</span><span>Create another bot</span></button>
+    </div>
+  </div>
+</div>
+<div class="toast-stack" id="toastStack" aria-live="polite"></div>
+<script type="module" src="/assets/magicui/magicui.js?v=2"></script>
+<script src="/assets/workspace.js?v=314" defer></script>
+</body>
+</html>

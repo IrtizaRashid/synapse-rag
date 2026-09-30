@@ -1,0 +1,92 @@
+services:
+  rag-api:
+    build: .
+    image: rag-api:latest
+    container_name: rag-api
+    restart: unless-stopped
+    expose:
+      - "8000"
+    env_file:
+      - .env
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - RAG_API_KEYS=${RAG_API_KEYS}
+      - RAG_BACKEND=${RAG_BACKEND:-vector}
+      - TRUST_PROXY=true
+      - COOKIE_SECURE=true
+    volumes:
+      - rag_data:/app/data
+    networks:
+      - ragnet
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import json, urllib.request; data=json.load(urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)); raise SystemExit(0 if data.get('status') == 'ok' else 1)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:2.33.3
+    container_name: rag-n8n
+    restart: unless-stopped
+    expose:
+      - "5678"
+    environment:
+      - N8N_HOST=n8n.rag.irtizarashid.shop
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://n8n.rag.irtizarashid.shop/
+      - N8N_EDITOR_BASE_URL=https://n8n.rag.irtizarashid.shop/
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_RUNNERS_ENABLED=true
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - GENERIC_TIMEZONE=Asia/Karachi
+      - TZ=Asia/Karachi
+      - RAG_API_BASE_URL=http://rag-api:8000
+      - RAG_API_KEY=${RAG_API_KEY}
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/workflows:/workflows:ro
+    networks:
+      - ragnet
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: rag-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - ragnet
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:80 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+networks:
+  ragnet:
+    driver: bridge
+
+volumes:
+  rag_data:
+  n8n_data:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,7 @@
+rag.irtizarashid.shop {
+	reverse_proxy rag-api:8000
+}
+
+n8n.rag.irtizarashid.shop {
+	reverse_proxy n8n:5678
+}

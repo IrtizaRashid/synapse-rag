@@ -1,0 +1,46 @@
+/* Synapse Magic UI integration. Components adapted from Magic UI under MIT. */
+#magicui-root{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;opacity:.2;mask-image:radial-gradient(ellipse at 58% 38%,#000 0%,transparent 70%)}
+#magicui-root:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 24% 16%,rgba(121,103,255,.2),transparent 26%),radial-gradient(circle at 78% 28%,rgba(60,201,176,.15),transparent 28%),radial-gradient(circle at 58% 86%,rgba(209,107,165,.14),transparent 30%)}
+.mui-dot-pattern{position:absolute;inset:0;width:100%;height:100%;color:#7967ff;pointer-events:none}
+.app-shell{position:relative;z-index:1}
+
+#magicWelcomeVisual{height:70px;margin-bottom:14px;display:grid;place-items:center}
+.welcome>.welcome-symbol{display:none}
+.mui-neural-mark{position:relative;width:68px;height:68px;display:grid;place-items:center;filter:drop-shadow(0 18px 40px rgba(121,103,255,.25))}
+.mui-orbit-dot{position:absolute;inset:-5px;border-radius:24px}
+.mui-orbit-dot:after{content:"";position:absolute;left:6px;top:7px;width:7px;height:7px;border-radius:50%;background:#d16ba5;box-shadow:0 0 18px #d16ba5}
+.mui-ring{position:absolute;inset:0;border:1px solid color-mix(in srgb,var(--accent) 48%,transparent);border-radius:18px}
+.mui-ring:before,.mui-ring:after{content:"";position:absolute;width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.mui-ring:before{left:-3px;top:24px}.mui-ring:after{right:6px;top:-3px}
+.mui-ring-two{inset:7px;border-radius:14px;border-color:color-mix(in srgb,#3cc9b0 55%,transparent);transform:rotate(35deg)}
+.mui-ring-two:before,.mui-ring-two:after{background:#3cc9b0;box-shadow:0 0 10px #3cc9b0}
+.mui-core{width:36px;height:36px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(135deg,var(--text),color-mix(in srgb,var(--text) 62%,#7967ff));color:var(--bg);font-weight:800;box-shadow:0 8px 28px color-mix(in srgb,var(--accent) 22%,transparent)}
+html[data-magicui="ready"] .mui-orbit-dot{animation:mui-spin 18s linear infinite}
+html[data-magicui="ready"] .mui-ring-one{animation:mui-spin 12s linear infinite}
+html[data-magicui="ready"] .mui-ring-two{animation:mui-spin-reverse 9s linear infinite}
+
+#magicQuickActions{width:100%}
+.mui-quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;width:100%}
+.mui-magic-card{--mui-card-bg:color-mix(in srgb,var(--surface) 88%,transparent);--mui-card-border:var(--border);position:relative;isolation:isolate;overflow:hidden;border:1px solid transparent;border-radius:14px;height:100%;box-shadow:0 14px 40px rgba(0,0,0,.12);backdrop-filter:blur(14px)}
+.mui-magic-glow{position:absolute;inset:1px;z-index:1;border-radius:inherit;opacity:0;transition:opacity .25s ease;pointer-events:none}
+.mui-magic-card:hover .mui-magic-glow{opacity:1}
+.mui-magic-content{position:relative;z-index:2;height:100%}
+.mui-action-button{width:100%;min-height:76px;background:transparent;color:var(--text);padding:15px;text-align:left;display:flex;align-items:center;gap:12px;border-radius:inherit}
+.mui-action-button:hover{background:color-mix(in srgb,var(--surface-2) 72%,transparent)}
+.mui-action-icon{width:36px;height:36px;flex:0 0 36px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--surface-3),color-mix(in srgb,var(--accent) 18%,var(--surface-3)));color:var(--text);font-weight:700}
+.mui-action-button strong,.mui-action-button small{display:block}.mui-action-button strong{font-size:13px}.mui-action-button small{font-size:11px;color:var(--text-3);margin-top:3px}
+
+#magicComposerBeam{position:absolute;inset:-1px;border-radius:inherit;overflow:hidden;pointer-events:none;z-index:0}
+.composer>*:not(#magicComposerBeam){position:relative;z-index:1}
+.mui-border-beam{position:absolute;inset:0;border:var(--beam-width) solid transparent;border-radius:inherit;mask:linear-gradient(transparent,transparent),linear-gradient(#000,#000);mask-clip:padding-box,border-box;mask-composite:intersect}
+.mui-border-beam-light{position:absolute;width:72px;aspect-ratio:1;background:linear-gradient(to left,var(--color-from,#7967ff),var(--color-to,#d16ba5),transparent);filter:blur(.2px);offset-path:rect(0 auto auto 0 round 72px);animation:mui-beam 8s linear infinite}
+.mui-beam-idle{opacity:.42;transition:opacity .2s}.mui-beam-active{opacity:1;transition:opacity .2s}
+.mui-beam-active .mui-border-beam-light{--color-from:#3cc9b0;animation-duration:2.8s}
+.mui-action-card{animation:mui-card-in .42s ease-out both}
+@keyframes mui-spin{to{transform:rotate(360deg)}}
+@keyframes mui-spin-reverse{to{transform:rotate(-325deg)}}
+@keyframes mui-beam{to{offset-distance:100%}}
+@keyframes mui-card-in{from{opacity:0;transform:translateY(-8px);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
+
+@media(max-width:760px){.mui-quick-grid{grid-template-columns:1fr}.mui-action-button{min-height:62px;padding:11px}#magicWelcomeVisual{height:56px;margin-bottom:10px}.mui-neural-mark{transform:scale(.86)}}
+@media(prefers-reduced-motion:reduce){#magicui-root{opacity:.1}.mui-magic-glow{display:none}.mui-orbit-dot,.mui-ring-one,.mui-ring-two,.mui-border-beam-light,.mui-action-card{animation:none!important}}

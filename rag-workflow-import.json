@@ -1,0 +1,277 @@
+{
+  "name": "Multi-format OCR RAG Gateway",
+  "id": "8b4f4d41-73b8-4bbd-b6e8-a332f8ab7f21",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rag/upload",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "3df66813-57c9-4f10-a560-bbf0a842f349",
+      "name": "Upload File Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-760, -300],
+      "webhookId": "0bd49220-ee54-4e2f-97b7-d5231bb72241"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\nif (!body.filename || !body.content_base64) throw new Error('filename and content_base64 are required');\nreturn [{ json: { filename: String(body.filename) }, binary: { data: { data: String(body.content_base64).replace(/^data:[^;]+;base64,/, ''), fileName: String(body.filename), mimeType: body.mime_type || 'application/octet-stream' } } }];"
+      },
+      "id": "949be98a-e94b-42ad-acbd-98770ec9ccca",
+      "name": "Validate and Decode File",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-520, -300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ ($env.RAG_API_BASE_URL || 'http://host.docker.internal:8000') + '/api/ingest/files' }}",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "files",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{ $env.RAG_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cfc983ca-f12c-41e3-ab6a-7ba82a4c4502",
+      "name": "OCR and Index File",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-260, -300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "0d8b727f-297d-48e7-ab6e-b3e893482402",
+      "name": "Return Upload Result",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [0, -300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rag/website",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "f31a777a-059e-4eed-960d-b67a2d823b7b",
+      "name": "Website Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-760, 0],
+      "webhookId": "5f968edb-b458-4128-9361-d13324bb3b03"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\nif (!body.url || !/^https?:\\/\\//i.test(body.url)) throw new Error('A valid http/https URL is required');\nreturn [{ json: { url: String(body.url) } }];"
+      },
+      "id": "cc390f7a-914d-4546-949f-c0ff0b1c1257",
+      "name": "Validate Website",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-520, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ ($env.RAG_API_BASE_URL || 'http://host.docker.internal:8000') + '/api/ingest/url' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{ $env.RAG_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4e04d1d9-0061-4181-9ffd-2d067b3107e7",
+      "name": "Extract and Index Website",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-260, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "25a2c0f5-f54f-4fb3-b2e1-c49cdb3378f3",
+      "name": "Return Website Result",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rag/ask",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "595763ed-b6e2-45a0-a30e-87372dd4e87a",
+      "name": "Ask Selected Files Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-760, 300],
+      "webhookId": "5e0e35e0-e9e2-4eec-a0f3-aa33f4a9fba8"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\nconst question = String(body.question || '').trim();\nif (question.length < 2) throw new Error('question is required');\nconst out = { question, top_k: Math.max(1, Math.min(Number(body.top_k || 5), 20)) };\nconst chatbot_id = body.chatbot_id ? String(body.chatbot_id).trim() : '';\nconst sources = Array.isArray(body.sources) ? body.sources.map(String) : [];\nif (!chatbot_id && sources.length === 0) throw new Error('Provide chatbot_id or at least one source');\nif (chatbot_id) out.chatbot_id = chatbot_id;\nif (sources.length) out.sources = sources;\nreturn [{ json: out }];"
+      },
+      "id": "a3d25134-92fc-4318-baae-471695498905",
+      "name": "Enforce Selected Sources",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-520, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ ($env.RAG_API_BASE_URL || 'http://host.docker.internal:8000') + '/api/ask' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{ $env.RAG_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "984529aa-f9c7-43ed-845f-86ace9650727",
+      "name": "Retrieve and Ask Gemini",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-260, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "9f7f03ef-b6cc-4a4e-8e71-7d78638ceee3",
+      "name": "Return Cited Answer",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [0, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rag/chatbot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "b7d1f7f8-8a63-4b1e-9f37-2a91c8f54d5b",
+      "name": "Create Chatbot Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-760, 600],
+      "webhookId": "9a41f7c8-2b55-4c62-8d37-5e91c8f54d5c"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\nconst name = String(body.name || '').trim();\nif (name.length < 1 || name.length > 100) throw new Error('name (1-100 chars) is required');\nconst sources = Array.isArray(body.sources) ? body.sources.map(String) : [];\nif (sources.length === 0) throw new Error('Select at least one source');\nconst out = { name, sources, description: body.description ? String(body.description).slice(0, 500) : '' };\nreturn [{ json: out }];"
+      },
+      "id": "c8e2f8a9-9b74-4c72-9e48-6f02d9f65e6d",
+      "name": "Validate Chatbot Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-520, 600]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ ($env.RAG_API_BASE_URL || 'http://host.docker.internal:8000') + '/api/chatbots' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{ $env.RAG_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d9f3a9ba-0c85-4d83-af59-7f13ea067f7e",
+      "name": "Create Chatbot in RAG API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-260, 600]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "ea04b0cb-1d96-4e94-b06a-8f24fb178f8f",
+      "name": "Return Chatbot Created",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [0, 600]
+    }
+  ],
+  "connections": {
+    "Upload File Webhook": {"main": [[{"node": "Validate and Decode File", "type": "main", "index": 0}]]},
+    "Validate and Decode File": {"main": [[{"node": "OCR and Index File", "type": "main", "index": 0}]]},
+    "OCR and Index File": {"main": [[{"node": "Return Upload Result", "type": "main", "index": 0}]]},
+    "Website Webhook": {"main": [[{"node": "Validate Website", "type": "main", "index": 0}]]},
+    "Validate Website": {"main": [[{"node": "Extract and Index Website", "type": "main", "index": 0}]]},
+    "Extract and Index Website": {"main": [[{"node": "Return Website Result", "type": "main", "index": 0}]]},
+    "Ask Selected Files Webhook": {"main": [[{"node": "Enforce Selected Sources", "type": "main", "index": 0}]]},
+    "Enforce Selected Sources": {"main": [[{"node": "Retrieve and Ask Gemini", "type": "main", "index": 0}]]},
+    "Retrieve and Ask Gemini": {"main": [[{"node": "Return Cited Answer", "type": "main", "index": 0}]]},
+    "Create Chatbot Webhook": {"main": [[{"node": "Validate Chatbot Request", "type": "main", "index": 0}]]},
+    "Validate Chatbot Request": {"main": [[{"node": "Create Chatbot in RAG API", "type": "main", "index": 0}]]},
+    "Create Chatbot in RAG API": {"main": [[{"node": "Return Chatbot Created", "type": "main", "index": 0}]]}
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}
